@@ -40,4 +40,6 @@ target
 secrets.yml
 .gradletasknamecache
 .sts4-cache
-.idea
+open-api-java-client/**
+!open-api-java-client/build.gradle
+!open-api-java-client/settings.gradle

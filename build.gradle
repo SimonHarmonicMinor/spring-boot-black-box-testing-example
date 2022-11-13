@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.5'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id "org.openapi.generator" version "6.2.0"
+	id "org.unbroken-dome.test-sets" version "4.0.0"
 }
 
 group = 'com.example'
@@ -40,6 +42,7 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:postgresql'
 	testImplementation 'com.h2database:h2'
+	testImplementation project(':open-api-java-client')
 }
 
 dependencyManagement {
@@ -50,4 +53,47 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+openApiGenerate {
+	inputSpec = "$buildDir/classes/java/openApiGenerator/open-api.json".toString()
+	outputDir = "$rootDir/open-api-java-client".toString()
+	apiPackage = "com.example.demo.generated"
+	invokerPackage = "com.example.demo.generated"
+	modelPackage = "com.example.demo.generated"
+	configOptions = [
+			dateLibrary    : "java8",
+			openApiNullable: "false",
+	]
+	generatorName = 'java'
+	groupId = "com.example.demo"
+	globalProperties = [
+			modelDocs: "false"
+	]
+	additionalProperties = [
+			hideGenerationTimestamp: true
+	]
+}
+
+testSets {
+	openApiGenerator
+}
+
+tasks.withType(Test) {
+	group = 'verification'
+	useJUnitPlatform()
+	testLogging {
+		showExceptions true
+		showStandardStreams = false
+		showCauses true
+		showStackTraces true
+		exceptionFormat "full"
+		events("skipped", "failed", "passed")
+	}
+}
+
+openApiGenerator.outputs.upToDateWhen { false }
+
+tasks.named('openApiGenerate') {
+	dependsOn 'openApiGenerator'
 }
