@@ -8,6 +8,7 @@ import com.example.demo.repo.ProductRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,6 +51,14 @@ public class ProductController {
         final var product = productRepository.findById(productId).orElseThrow();
         product.updateQuantity(newQuantity);
         return new ProductResponse(product);
+    }
+
+    @GetMapping("/api/product/{productId}")
+    @Transactional
+    public ProductResponse getProductById(@PathVariable Long productId) {
+        return productRepository.findById(productId)
+            .map(ProductResponse::new)
+            .orElseThrow();
     }
 
     @DeleteMapping("/api/product/{productId}")
